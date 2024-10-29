@@ -1,11 +1,27 @@
 [bits 64]
 file_addr: equ 0x100000
 
+stdout: equ 1
+
 sys_read: equ 0
 sys_write: equ 1
 sys_open: equ 2
 sys_close: equ 3
 sys_exit: equ 60
+
+%macro syscall1 2
+    mov rax, %1
+    mov rdi, %2
+    syscall
+%endmacro
+
+%macro syscall3 4
+    mov rax, %1
+    mov rdi, %2
+    mov rsi, %3
+    mov rdx, %4
+    syscall
+%endmacro
 
 elf_header:
     db 0x7f, 'E', 'L', 'F' ; EI_MAG: ELF magic number
@@ -71,11 +87,7 @@ _start:
     jb exit
 
     ; open for reading
-    mov rax, sys_open
-    mov rdi, [rsp + 8*2] ; argv[1]
-    mov rsi, 0 ; RDONLY
-    mov rdx, 0 ; mode (ignored?)
-    syscall
+    syscall3 sys_open, [rsp + 8*2], 0, 0 ; argv[1], RDONLY, mode (ignored?)
     cmp rax, 0
     js exit
 
@@ -84,31 +96,16 @@ _start:
     sub rsp, 1 ; allocate 1 byte on the stack
 
 read_loop:
-    mov rax, sys_read
-    mov rdi, r15 ; input file fd
-    mov rsi, rsp ; buf
-    mov rdx, 1 ; count
-    syscall
-    
+    syscall3 sys_read, r15, rsp, 1 ; input file fd, buf, count
     cmp rax, 0
     je exit
 
-    mov rax, sys_write
-    mov rdi, 1 ; fd: stdout
-    ; mov rsi, rsp ; same buf, no need to set again
-    mov rdx, 1 ; count
-    syscall
-
+    syscall3 sys_write, stdout, rsp, 1 ; fd, buf, count
     jmp read_loop
 
 exit:
-    mov rax, sys_close
-    mov rdi, r15 
-    syscall
-
-    mov rax, sys_exit
-    xor rdi, rdi
-    syscall
+    syscall1 sys_close, r15
+    syscall1 sys_exit, 0
 
 string_table:
 _text:
