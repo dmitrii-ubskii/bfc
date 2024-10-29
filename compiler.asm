@@ -1,6 +1,12 @@
 [bits 64]
 file_addr: equ 0x100000
 
+sys_read: equ 0
+sys_write: equ 1
+sys_open: equ 2
+sys_close: equ 3
+sys_exit: equ 60
+
 elf_header:
     db 0x7f, 'E', 'L', 'F' ; EI_MAG: ELF magic number
     db 2 ; EI_CLASS: 32 bit
@@ -59,7 +65,48 @@ strings:
     dq 0 ; sh_entsize
 
 _start:
-    mov rax, 60
+    ; expect filename
+    mov rax, [rsp] ; argc
+    cmp rax, 2
+    jb exit
+
+    ; open for reading
+    mov rax, sys_open
+    mov rdi, [rsp + 8*2] ; argv[1]
+    mov rsi, 0 ; RDONLY
+    mov rdx, 0 ; mode (ignored?)
+    syscall
+    cmp rax, 0
+    js exit
+
+    mov r15, rax ; r15
+
+    sub rsp, 1 ; allocate 1 byte on the stack
+
+read_loop:
+    mov rax, sys_read
+    mov rdi, r15 ; input file fd
+    mov rsi, rsp ; buf
+    mov rdx, 1 ; count
+    syscall
+    
+    cmp rax, 0
+    je exit
+
+    mov rax, sys_write
+    mov rdi, 1 ; fd: stdout
+    ; mov rsi, rsp ; same buf, no need to set again
+    mov rdx, 1 ; count
+    syscall
+
+    jmp read_loop
+
+exit:
+    mov rax, sys_close
+    mov rdi, r15 
+    syscall
+
+    mov rax, sys_exit
     xor rdi, rdi
     syscall
 
