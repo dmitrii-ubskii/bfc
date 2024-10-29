@@ -99,6 +99,7 @@ read_loop:
     syscall3 sys_read, r15, rsp, 1 ; input file fd, buf, count
     cmp rax, 0
     je exit
+    js exit
 
     syscall3 sys_write, stdout, rsp, 1 ; fd, buf, count
     jmp read_loop
