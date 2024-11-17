@@ -147,7 +147,7 @@ exit_call_end:
 
 bf_setup:
     sub rsp, 2048 ; tape
-    mov r11, 1024 ; r11 := tape cursor
+    mov r14, 1024 ; r14 := tape cursor
     mov r12, rsp  ; r12 := tape start
     xor rax, rax  ; rax := current value at cursor
     sub rsp, 16   ; read buffer, keep aligned to 16 bytes
@@ -163,29 +163,25 @@ bf_dec:
 bf_dec_end:
 
 bf_right:
-    mov [r12 + r11], al
-    inc r11
-    mov al, [r12 + r11]
+    mov [r12 + r14], al
+    inc r14
+    mov al, [r12 + r14]
 bf_right_end:
 
 bf_left:
-    mov [r12 + r11], al
-    dec r11
-    mov al, [r12 + r11]
+    mov [r12 + r14], al
+    dec r14
+    mov al, [r12 + r14]
 bf_left_end:
 
 bf_read:
-    push r11
     syscall3 sys_read, stdin, r13, 1 ; fd, buf, count
-    pop r11
     mov al, [r13]
 bf_read_end:
 
 bf_write:
     mov [r13], al
-    push r11
     syscall3 sys_write, stdout, r13, 1 ; fd, buf, count
-    pop r11
     mov al, [r13]
 bf_write_end:
 
