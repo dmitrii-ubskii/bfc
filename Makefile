@@ -1,5 +1,5 @@
 .PHONY: build
-build: compiler
-compiler: compiler.asm *.inc
-	nasm -f bin -o compiler compiler.asm
-	chmod +x compiler
+build: bfc
+bfc: bfc.asm *.inc
+	nasm -f bin -o bfc bfc.asm
+	chmod +x bfc
