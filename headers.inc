@@ -25,8 +25,10 @@ program_header:
     dq 0 ; p_offset: offset of the segment
     dq file_addr ; p_vaddr: virtual address of the segment in memory
     dq file_addr ; p_paddr: physical address
+p_filesz:
     dq string_table ; p_filesz: size in bytes of the segment in the file
-    dq string_table ; p_filesz: size in bytes of the segment in memory
+p_memsz:
+    dq string_table ; p_memsz: size in bytes of the segment in memory
     dq 0 ; p_align: no alignment
 
 section_headers:
@@ -37,6 +39,7 @@ text:
     dq 6 ; sh_flags = SHF_EXECINSTR | SHF_ALLOC
     dq file_addr ; sh_addr 
     dq 0 ; sh_offset
+_text_sh_size:
     dq string_table ; sh_size
     dd 0 ; sh_link
     dd 0 ; sh_info
@@ -48,6 +51,7 @@ strings:
     dd 3 ; sh_type = SHT_STRTAB 
     dq 0 ; sh_flags = NULL
     dq file_addr + string_table ; sh_addr 
+_strings_sh_offset:
     dq string_table ; sh_offset
     dq _end - string_table ; sh_size
     dd 0 ; sh_link
@@ -55,3 +59,4 @@ strings:
     dq 1 ; sh_addralign
     dq 0 ; sh_entsize
 
+headers_end:
