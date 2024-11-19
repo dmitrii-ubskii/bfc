@@ -11,7 +11,12 @@ _start:
     jb exit_call
 
     ; open for reading
-    syscall3 sys_open, [rsp + 8*2], 0, 0 ; argv[1], RDONLY, mode (ignored?)
+    mov rax, sys_open
+    mov rdi, [rsp + 8*2] ; argv[1]
+    xor rsi, rsi ; RDONLY
+    xor rdx, rdx ; mode (ignored?)
+    syscall
+
     test rax, rax
     jz exit_call
     mov r15, rax ; r15 := input file fd
@@ -33,12 +38,16 @@ _start:
     mov rdx, bf_setup_end - bf_setup
     syscall
 
-    sub rsp, 16 ; allocate 16 bytes on the stack
     mov r10, rsp ; r10 := buf
 
 read_loop:
-    syscall3 sys_read, r15, r10, 1 ; input file fd, buf, count
-    cmp rax, 0
+    xor rax, rax ; sys_read
+    mov rdi, r15 ; input file
+    mov rsi, r10 ; buf
+    mov rdx, 1   ; count
+    syscall
+
+    test rax, rax
     jle exit
 
     mov al, [r10]
@@ -103,7 +112,7 @@ write_write:
 write_loop_start:
     ; record place to jump back to
     mov rax, sys_lseek
-    mov rsi, 0
+    xor rsi, rsi
     mov rdx, SEEK_CUR
     syscall
 
@@ -119,7 +128,7 @@ perform_write:
 
 write_loop_end:
     mov rax, sys_lseek
-    mov rsi, 0
+    xor rsi, rsi
     mov rdx, SEEK_CUR
     syscall
 
@@ -183,7 +192,7 @@ exit:
     syscall
 
     mov rax, sys_lseek
-    mov rsi, 0
+    xor rsi, rsi
     mov rdx, SEEK_CUR
     syscall
 
@@ -231,7 +240,9 @@ exit:
     syscall1 sys_close, r15
 
 exit_call:
-    syscall1 sys_exit, 0
+    mov rax, sys_exit
+    xor rdi, rdi
+    syscall
 exit_call_end:
 
 bf_setup:
