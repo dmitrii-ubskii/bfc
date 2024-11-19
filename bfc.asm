@@ -8,18 +8,18 @@ _start:
     ; expect filename
     mov rax, [rsp] ; argc
     cmp rax, 2
-    jb exit
+    jb exit_call
 
     ; open for reading
     syscall3 sys_open, [rsp + 8*2], 0, 0 ; argv[1], RDONLY, mode (ignored?)
-    cmp rax, 0
-    js exit
+    test rax, rax
+    jz exit_call
     mov r15, rax ; r15 := input file fd
 
     ; open for writing
     syscall3 sys_open, file_addr + out_file, 0o1101, 0o754 ; argv[1], WRONLY + CREAT + TRUNC, rwxr-xr--
-    cmp rax, 0
-    js exit
+    test rax, rax
+    jz exit_call
     mov r14, rax ; r14 := output file fd
 
     syscall3 sys_write, r14, file_addr + elf_header, headers_end - elf_header
