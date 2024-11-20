@@ -11,7 +11,7 @@ _start:
     jb exit_call
 
     ; open for reading
-    mov rax, sys_open
+    stackmov rax, sys_open 
     mov rdi, [rsp + 8*2] ; argv[1]
     xor rsi, rsi ; RDONLY
     xor rdx, rdx ; mode (ignored?)
@@ -22,20 +22,25 @@ _start:
     mov r15, rax ; r15 := input file fd
 
     ; open for writing
-    syscall3 sys_open, file_addr + out_file, 0o1101, 0o754 ; argv[1], WRONLY + CREAT + TRUNC, rwxr-xr--
+    stackmov rax, sys_open 
+    stackmov rdi, file_addr + out_file ; "a.out"
+    mov rsi, 0o1101 ; WRONLY + CREAT + TRUNC
+    mov rdx, 0o754 ; rwxr-xr--
+    syscall
+
     test rax, rax
     jz exit_call
     mov r14, rax ; r14 := output file fd
 
-    mov rax, sys_write
+    stackmov rax, sys_write 
     mov rdi, r14
-    mov rsi, file_addr + elf_header
+    stackmov rsi, file_addr + elf_header
     mov rdx, headers_end - elf_header
     syscall
 
-    mov rax, sys_write
-    mov rsi, file_addr + bf_setup
-    mov rdx, bf_setup_end - bf_setup
+    stackmov rax, sys_write 
+    stackmov rsi, file_addr + bf_setup
+    stackmov rdx, bf_setup_end - bf_setup
     syscall
 
     mov r10, rsp ; r10 := buf
@@ -44,7 +49,7 @@ read_loop:
     xor rax, rax ; sys_read
     mov rdi, r15 ; input file
     mov rsi, r10 ; buf
-    mov rdx, 1   ; count
+    stackmov rdx, 1   ; count
     syscall
 
     test rax, rax
@@ -80,56 +85,56 @@ read_loop:
     jmp read_loop
 
 write_inc:
-    mov rsi, file_addr + bf_inc
-    mov rdx, bf_inc_end - bf_inc
+    stackmov rsi, file_addr + bf_inc
+    stackmov rdx, bf_inc_end - bf_inc
     jmp perform_write
 
 write_dec:
-    mov rsi, file_addr + bf_dec
-    mov rdx, bf_dec_end - bf_dec
+    stackmov rsi, file_addr + bf_dec
+    stackmov rdx, bf_dec_end - bf_dec
     jmp perform_write
 
 write_right:
-    mov rsi, file_addr + bf_right
-    mov rdx, bf_right_end - bf_right
+    stackmov rsi, file_addr + bf_right
+    stackmov rdx, bf_right_end - bf_right
     jmp perform_write
 
 write_left:
-    mov rsi, file_addr + bf_left
-    mov rdx, bf_left_end - bf_left
+    stackmov rsi, file_addr + bf_left
+    stackmov rdx, bf_left_end - bf_left
     jmp perform_write
 
 write_read:
-    mov rsi, file_addr + bf_read
-    mov rdx, bf_read_end - bf_read
+    stackmov rsi, file_addr + bf_read
+    stackmov rdx, bf_read_end - bf_read
     jmp perform_write
 
 write_write:
-    mov rsi, file_addr + bf_write
-    mov rdx, bf_write_end - bf_write
+    stackmov rsi, file_addr + bf_write
+    stackmov rdx, bf_write_end - bf_write
     jmp perform_write
 
 write_loop_start:
     ; record place to jump back to
-    mov rax, sys_lseek
+    stackmov rax, sys_lseek 
     xor rsi, rsi
-    mov rdx, SEEK_CUR
+    stackmov rdx, SEEK_CUR
     syscall
 
     push rax
 
     ; write `test`
-    mov rsi, file_addr + bf_test
-    mov rdx, bf_test_end - bf_test
+    stackmov rsi, file_addr + bf_test
+    stackmov rdx, bf_test_end - bf_test
 perform_write:
-    mov rax, sys_write
+    stackmov rax, sys_write 
     syscall
     jmp read_loop
 
 write_loop_end:
-    mov rax, sys_lseek
+    stackmov rax, sys_lseek 
     xor rsi, rsi
-    mov rdx, SEEK_CUR
+    stackmov rdx, SEEK_CUR
     syscall
 
     add rax, 5 ; account for   E9 cd    JMP near relative
@@ -142,14 +147,14 @@ write_loop_end:
     neg eax       ; r13 - r12 == start - end
     push rax
 
-    mov rax, sys_write
-    mov rsi, file_addr + JMP
-    mov rdx, 1
+    stackmov rax, sys_write 
+    stackmov rsi, file_addr + JMP
+    stackmov rdx, 1
     syscall
 
-    mov rax, sys_write
-    mov rsi, rsp
-    mov rdx, 4
+    stackmov rax, sys_write 
+    stackmov rsi, rsp
+    stackmov rdx, 4
     syscall
 
     pop rax
@@ -159,24 +164,24 @@ write_loop_end:
 
     add r13, bf_reserve_jz - bf_test
 
-    mov rax, sys_lseek
+    stackmov rax, sys_lseek 
     mov rsi, r13
     xor rdx, rdx ; SEEK_SET
     syscall
 
-    mov rax, sys_write
-    mov rsi, file_addr + JE
-    mov rdx, 2
+    stackmov rax, sys_write 
+    stackmov rsi, file_addr + JE
+    stackmov rdx, 2
     syscall
 
-    mov rax, sys_write
-    mov rsi, rsp
-    mov rdx, 4
+    stackmov rax, sys_write 
+    stackmov rsi, rsp
+    stackmov rdx, 4
     syscall
 
     pop r11
 
-    mov rax, sys_lseek
+    stackmov rax, sys_lseek 
     mov rsi, r12
     xor rdx, rdx ; SEEK_SET
     syscall
@@ -186,61 +191,62 @@ write_loop_end:
 exit:
     mov rdi, r14
 
-    mov rax, sys_write
-    mov rsi, file_addr + exit_call
-    mov rdx, exit_call_end - exit_call
+    stackmov rax, sys_write 
+    stackmov rsi, file_addr + exit_call
+    stackmov rdx, exit_call_end - exit_call
     syscall
 
-    mov rax, sys_lseek
+    stackmov rax, sys_lseek 
     xor rsi, rsi
-    mov rdx, SEEK_CUR
+    stackmov rdx, SEEK_CUR
     syscall
 
     push rax
 
-    mov rax, sys_write
-    mov rsi, file_addr + string_table
-    mov rdx, _end - string_table
+    stackmov rax, sys_write 
+    stackmov rsi, file_addr + string_table
+    stackmov rdx, _end - string_table
     syscall
 
-    mov rax, sys_lseek
-    mov rsi, p_filesz
+    stackmov rax, sys_lseek 
+    stackmov rsi, p_filesz
     xor rdx, rdx ; SEEK_SET
     syscall
 
-    mov rax, sys_write
+    stackmov rax, sys_write 
     syscall
 
-    mov rax, sys_write
+    stackmov rax, sys_write 
     syscall
 
-    mov rax, sys_lseek
-    mov rsi, _text_sh_size
+    stackmov rax, sys_lseek 
+    stackmov rsi, _text_sh_size
     xor rdx, rdx ; SEEK_SET
     syscall
     
-    mov rax, sys_write
+    stackmov rax, sys_write 
     mov rsi, rsp
-    mov rdx, 8
+    stackmov rdx, 8
     syscall
 
-    mov rax, sys_lseek
-    mov rsi, _strings_sh_offset
+    stackmov rax, sys_lseek 
+    stackmov rsi, _strings_sh_offset
     xor rdx, rdx ; SEEK_SET
     syscall
 
-    mov rax, sys_write
-    mov rsi, rsp
-    mov rdx, 8
+    stackmov rax, sys_write 
+    stackmov rsi, rsp
+    stackmov rdx, 8
     syscall
 
-    mov rax, sys_close
+    stackmov rax, sys_close 
     syscall
 
-    syscall1 sys_close, r15
+    stackmov rax, sys_close 
+    mov rdi, r15
 
 exit_call:
-    mov rax, sys_exit
+    stackmov rax, sys_exit 
     xor rdi, rdi
     syscall
 exit_call_end:
@@ -277,7 +283,7 @@ bf_read:
     xor rax, rax ; sys_read
     xor rdi, rdi ; stdin
     mov rsi, r13
-    mov rdx, 1
+    stackmov rdx, 1
     syscall
 
     mov al, [r13]
@@ -285,7 +291,11 @@ bf_read_end:
 
 bf_write:
     mov [r13], al
-    syscall3 sys_write, stdout, r13, 1 ; fd, buf, count
+    stackmov rax, sys_write 
+    stackmov rdi, stdout 
+    mov rsi, r13 ; buf
+    stackmov rdx, 1 ; count
+    syscall
     mov al, [r13]
 bf_write_end:
 

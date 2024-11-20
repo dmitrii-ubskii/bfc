@@ -11,17 +11,8 @@ sys_exit: equ 60
 
 SEEK_CUR: equ 1
 
-%macro syscall1 2
-    mov rax, %1
-    mov rdi, %2
-    syscall
-%endmacro
-
-%macro syscall3 4
-    mov rax, %1
-    mov rdi, %2
-    mov rsi, %3
-    mov rdx, %4
-    syscall
+%macro stackmov 2
+    push %2
+    pop %1
 %endmacro
 
