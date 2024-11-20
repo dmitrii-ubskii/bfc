@@ -247,9 +247,9 @@ exit_call:
 exit_call_end:
 
 bf_setup:
-    sub rsp, 1024 ; half tape
+    sub rsp, 4096 ; half tape
     mov r14, rsp  ; r14 := tape cursor
-    sub rsp, 1024 ; half tape
+    sub rsp, 4096 ; half tape
     mov r13, rsp  ; r13 := read buffer
     xor al, al    ; al := current value at cursor
 bf_setup_end:
