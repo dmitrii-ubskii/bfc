@@ -14,7 +14,6 @@ _start:
     stackmov rax, sys_open 
     mov rdi, [rsp + 8*2] ; argv[1]
     xor rsi, rsi ; RDONLY
-    xor rdx, rdx ; mode (ignored?)
     syscall
 
     test rax, rax
