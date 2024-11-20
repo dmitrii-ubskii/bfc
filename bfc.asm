@@ -295,8 +295,7 @@ bf_write_end:
 
 bf_test:
     test al, al
-bf_jz:
-    db 0x0F, 0x84
+    db 0x0F, 0x84 ; JZ
 bf_test_jmp_target:
     dd 0 ; rel32
 bf_test_end:
