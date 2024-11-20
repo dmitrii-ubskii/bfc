@@ -196,6 +196,7 @@ exit:
     syscall
 
     push rax
+    push rax
 
     stackmov rax, sys_write 
     stackmov rsi, file_addr + string_table
@@ -209,10 +210,7 @@ exit:
 
     stackmov rax, sys_write 
     stackmov rsi, rsp
-    stackmov rdx, 8
-    syscall
-
-    stackmov rax, sys_write 
+    stackmov rdx, 16
     syscall
 
     stackmov rax, sys_lseek 
