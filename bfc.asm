@@ -161,16 +161,11 @@ write_loop_end:
     sub eax, bf_test_end - bf_test ; account for rip pointing after test and je
     push rax
 
-    add r13, bf_reserve_jz - bf_test
+    add r13, bf_test_jmp_target - bf_test
 
     stackmov rax, sys_lseek 
     mov rsi, r13
     xor rdx, rdx ; SEEK_SET
-    syscall
-
-    stackmov rax, sys_write 
-    stackmov rsi, file_addr + JE
-    stackmov rdx, 2
     syscall
 
     stackmov rax, sys_write 
@@ -300,14 +295,13 @@ bf_write_end:
 
 bf_test:
     test al, al
-bf_reserve_jz:
-    dw 0 ; 0F 84
+bf_jz:
+    db 0x0F, 0x84
+bf_test_jmp_target:
     dd 0 ; rel32
 bf_test_end:
 
 JMP: db 0xE9
-JE: db 0x0F, 0x84
-
 out_file:
     db "a.out", 0
 
