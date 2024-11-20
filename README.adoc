@@ -1,3 +1,6 @@
 = bfc: tiny handwritten brainfuck compiler
 
 Featuring handwritten ELF headers and no optimiztions whatsoever.
+
+Currently at 848 bytes, of which 248 bytes are the headers.
+
