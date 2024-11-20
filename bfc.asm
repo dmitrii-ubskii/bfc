@@ -173,7 +173,7 @@ write_loop_end:
     stackmov rdx, 4
     syscall
 
-    pop r11
+    pop rax
 
     stackmov rax, sys_lseek 
     mov rsi, r12
