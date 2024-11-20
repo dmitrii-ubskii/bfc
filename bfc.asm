@@ -240,6 +240,7 @@ exit:
 
     stackmov rax, sys_close 
     mov rdi, r15
+    syscall
 
 exit_call:
     stackmov rax, sys_exit 
