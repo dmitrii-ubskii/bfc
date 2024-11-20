@@ -6,17 +6,17 @@
 
 _start:
     ; expect filename
-    mov rax, [rsp] ; argc
-    cmp rax, 2
+    mov al, [rsp] ; argc
+    cmp al, 2
     jb exit_call
 
     ; open for reading
     stackmov rax, sys_open 
     mov rdi, [rsp + 8*2] ; argv[1]
-    xor rsi, rsi ; RDONLY
+    xor esi, esi ; RDONLY
     syscall
 
-    test rax, rax
+    test eax, eax
     jz exit_call
     mov r15, rax ; r15 := input file fd
 
@@ -27,7 +27,7 @@ _start:
     mov rdx, 0o754 ; rwxr-xr--
     syscall
 
-    test rax, rax
+    test eax, eax
     jz exit_call
     mov r14, rax ; r14 := output file fd
 
@@ -45,13 +45,13 @@ _start:
     mov r10, rsp ; r10 := buf
 
 read_loop:
-    xor rax, rax ; sys_read
+    xor eax, eax ; sys_read
     mov rdi, r15 ; input file
     mov rsi, r10 ; buf
     stackmov rdx, 1   ; count
     syscall
 
-    test rax, rax
+    test eax, eax
     jle exit
 
     mov al, [r10]
@@ -116,7 +116,7 @@ write_write:
 write_loop_start:
     ; record place to jump back to
     stackmov rax, sys_lseek 
-    xor rsi, rsi
+    xor esi, esi
     stackmov rdx, SEEK_CUR
     syscall
 
@@ -132,7 +132,7 @@ perform_write:
 
 write_loop_end:
     stackmov rax, sys_lseek 
-    xor rsi, rsi
+    xor esi, esi
     stackmov rdx, SEEK_CUR
     syscall
 
@@ -165,7 +165,7 @@ write_loop_end:
 
     stackmov rax, sys_lseek 
     mov rsi, r13
-    xor rdx, rdx ; SEEK_SET
+    xor edx, edx ; SEEK_SET
     syscall
 
     stackmov rax, sys_write 
@@ -177,7 +177,7 @@ write_loop_end:
 
     stackmov rax, sys_lseek 
     mov rsi, r12
-    xor rdx, rdx ; SEEK_SET
+    xor edx, edx ; SEEK_SET
     syscall
 
     jmp read_loop
@@ -191,7 +191,7 @@ exit:
     syscall
 
     stackmov rax, sys_lseek 
-    xor rsi, rsi
+    xor esi, esi
     stackmov rdx, SEEK_CUR
     syscall
 
@@ -204,7 +204,7 @@ exit:
 
     stackmov rax, sys_lseek 
     stackmov rsi, p_filesz
-    xor rdx, rdx ; SEEK_SET
+    xor edx, edx ; SEEK_SET
     syscall
 
     stackmov rax, sys_write 
@@ -215,7 +215,7 @@ exit:
 
     stackmov rax, sys_lseek 
     stackmov rsi, _text_sh_size
-    xor rdx, rdx ; SEEK_SET
+    xor edx, edx ; SEEK_SET
     syscall
     
     stackmov rax, sys_write 
@@ -225,7 +225,7 @@ exit:
 
     stackmov rax, sys_lseek 
     stackmov rsi, _strings_sh_offset
-    xor rdx, rdx ; SEEK_SET
+    xor edx, edx ; SEEK_SET
     syscall
 
     stackmov rax, sys_write 
@@ -241,7 +241,7 @@ exit:
 
 exit_call:
     stackmov rax, sys_exit 
-    xor rdi, rdi
+    xor edi, edi
     syscall
 exit_call_end:
 
@@ -274,8 +274,8 @@ bf_left:
 bf_left_end:
 
 bf_read:
-    xor rax, rax ; sys_read
-    xor rdi, rdi ; stdin
+    xor eax, eax ; sys_read
+    xor edi, edi ; stdin
     mov rsi, r13
     stackmov rdx, 1
     syscall
