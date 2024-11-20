@@ -1,6 +1,6 @@
 elf_header:
     db 0x7f, 'E', 'L', 'F' ; EI_MAG: ELF magic number
-    db 2 ; EI_CLASS: 32 bit
+    db 2 ; EI_CLASS: 64 bit
     db 1 ; EI_DATA: little-endian
     db 1 ; EI_VERSION: ELF v1
     db 3 ; EI_OSABI: Linux ABI
