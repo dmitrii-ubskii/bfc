@@ -276,8 +276,8 @@ bf_left_end:
 bf_read:
     xor eax, eax ; sys_read
     xor edi, edi ; stdin
-    mov rsi, r13
-    stackmov rdx, 1
+    mov rsi, r13 ; buf
+    stackmov rdx, 1 ; count
     syscall
 
     mov al, [r13]
@@ -290,6 +290,7 @@ bf_write:
     mov rsi, r13 ; buf
     stackmov rdx, 1 ; count
     syscall
+
     mov al, [r13]
 bf_write_end:
 
