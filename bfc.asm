@@ -208,6 +208,8 @@ exit:
     syscall
 
     stackmov rax, sys_write 
+    stackmov rsi, rsp
+    stackmov rdx, 8
     syscall
 
     stackmov rax, sys_write 
@@ -219,7 +221,7 @@ exit:
     syscall
     
     stackmov rax, sys_write 
-    mov rsi, rsp
+    stackmov rsi, rsp
     stackmov rdx, 8
     syscall
 
