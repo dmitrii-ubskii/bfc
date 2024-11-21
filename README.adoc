@@ -4,3 +4,32 @@ Featuring handwritten ELF headers and no optimiztions whatsoever.
 
 Currently at 848 bytes, of which 248 bytes are the headers.
 
+Biggest size wins:
+
+[cols="1,6,1,1,1"]
+|===
+|commit |change |before |after |delta
+
+|6b41b97
+|reuse registers between syscalls; use xor to zero a register
+|1263
+|1089
+|-174
+
+|dd0b0f5
+|more xor x,x instead of mov x,0
+|1089
+|1070
+|-19
+
+|c6c27bc
+|replace `mov r64, imm` with `push imm; pop r64` where shorter
+|1062
+|885
+|-177
+
+|5bb9793
+|write JE with placeholder
+|882
+|866
+|-16
